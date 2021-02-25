@@ -72,85 +72,132 @@ def readSolution(file):
 	
 def simulate(file):
 	F, I, D, streets, cars, cycles = readSolution(file)
-	sim = np.zeros((D + 1, I))
-	for i in range(I):
-		if not (i in cycles):
-			for k in range(D + 1):
-				sim[k][i] = -1
-			continue
-		count = 0
-		#print("Fill " + str(i))
-		while count <= D:
-			#print("len=" + str(len(cycles[i])))
-			for j in range(len(cycles[i])):
-				#print("Put " + str(cycles[i][j][0]))
-				for k in range(cycles[i][j][1]):
+	if False:
+		sim = np.zeros((D + 1, I))
+		for i in range(I):
+			if not (i in cycles):
+				for k in range(D + 1):
+					sim[k][i] = -1
+				continue
+			count = 0
+			#print("Fill " + str(i))
+			while count <= D:
+				#print("len=" + str(len(cycles[i])))
+				for j in range(len(cycles[i])):
+					#print("Put " + str(cycles[i][j][0]))
+					for k in range(cycles[i][j][1]):
+						if count == D + 1:
+							break
+						sim[count][i] = cycles[i][j][0]
+						count += 1
 					if count == D + 1:
 						break
-					sim[count][i] = cycles[i][j][0]
-					count += 1
-				if count == D + 1:
-					break
 	cost = 0
 	
 	status = []#np.zeros((I,))
-	for i in range(len(I)):
+	for i in range(I):
 		if not (i in cycles):
-			status.append((-1, 0, 0))
+			status.append([-1, 0, 0])
 		else:
-			status.append((0, cycles[i][0][0], cycles[i][0][1] - 1))
+			# (street, ptr, time left of ampel)
+			status.append([cycles[i][0][0], 0, cycles[i][0][1] - 1])
 	def next():
-		for in range(len(I)):
+		for i in range(I):
 			if i in cycles:
-				# Should another?
-				ptr = status[i][0]
+				# Should another
 				if status[i][2] == 0:
-					ptr += 1
-					if ptr == len(cycles[i]):
-						ptr = 0
-					status[i][0] = ptr
-		
+					status[i][1] += 1
+					if status[i][1] == len(cycles[i]):
+						status[i][1] = 0
+					# Change street
+					status[i][0] = cycles[i][status[i][1]][0]
+					
+					# Change counter
+					status[i][2] = cycles[i][status[i][1]][1] - 1
+				else:
+					status[i][2] -= 1
+	#def cmp(t):
+  #	for i in range(I):
+	#		if status[i][0] != sim[t][i]:
+  #				return False
+	#	return True
 	
-	for time in range(D + 1):
-		ampel = next()
+	if False:
+		for time in range(D + 1):
+			if not cmp(time):
+				print("Bad!")
+				sys.exit(-1)
+			next()
 	
+	cs = []
 	for index in range(len(cars)):
-		#print("Now: " + str(index))
-		
-		time = 0
-		ptr = 0
-		curr = cars[index][ptr]
-		ptr += 1
-		
-		if ptr == len(cars[index]):
-			print("Already won!")
-			cost += F + D
-			continue
-		won = True
-		consume = 0
-		while time <= D:
-			if time == D:
-				if consume:
-					won = False
-					break
-			#print("time=" + str(time) + " curr=" + str(curr) + " consume=" + str(consume))
-			if consume:
-				consume -= 1
-				time += 1
+		# (curr street, consume, ptr, won, last time)
+		cs.append([cars[index][0], 0, 1, True, D + 1])
+	for time in range(D + 1):
+		#for i in range(I):
+	 #		for 
+		for index in range(len(cars)):
+			if cs[index][4] != D + 1 or cs[index][3] == False:
 				continue
+			if time == D:
+				if cs[index][1]:
+					cs[index][3] = False
+					continue
+			if cs[index][1]:
+				cs[index][1] -= 1
+				continue
+			if cs[index][2] == len(cars[index]):
+				cs[index][4] = time
+				continue
+			#print("curr=" + status=" 
+			if status[streets[cs[index][0]][1]][0] == cs[index][0]:
+				cs[index][0] = cars[index][cs[index][2]]
+				cs[index][1] = streets[cs[index][0]][3] - 1
+				cs[index][2] += 1
+		next()
+	cost = 0
+	for index in range(len(cars)):
+		print("won=" + str(cs[index][3]) + " ptr=" + str(cs[index][2]) + " vs " + str(len(cars[index])) + " consume=" + str(cs[index][1]))
+		if cs[index][3] and cs[index][2] == len(cars[index]) and (not cs[index][1]):
+			cost += F + D - cs[index][4]
+	if False:
+		for index in range(len(cars)):
+			#print("Now: " + str(index))
+			
+			time = 0
+			ptr = 0
+			curr = cars[index][ptr]
+			ptr += 1
 			
 			if ptr == len(cars[index]):
-				break
-			
-			if sim[time][streets[curr][1]] == curr:
-				#print("\tchage to " + str(cars[index][ptr]) + " consume=" + str(streets[cars[index][ptr]][3] - 1))
-				curr = cars[index][ptr]
-				consume = streets[curr][3] - 1
-				ptr += 1
-			time += 1
-		#print("ptr=" + str(ptr) + " vs " + str(len(cars[index])) + " consume=" + str(consume))
-		if won and ptr == len(cars[index]) and (not consume):
-			cost += F + D - time
+				print("Already won!")
+				cost += F + D
+				continue
+			won = True
+			consume = 0
+			while time <= D:
+				if time == D:
+					if consume:
+						won = False
+						break
+				#print("time=" + str(time) + " curr=" + str(curr) + " consume=" + str(consume))
+				if consume:
+					consume -= 1
+					time += 1
+					continue
+				
+				if ptr == len(cars[index]):
+					break
+				
+				if sim[time][streets[curr][1]] == curr:
+					#print("\tchage to " + str(cars[index][ptr]) + " consume=" + str(streets[cars[index][ptr]][3] - 1))
+					curr = cars[index][ptr]
+					consume = streets[curr][3] - 1
+					ptr += 1
+				time += 1
+			#print("ptr=" + str(ptr) + " vs " + str(len(cars[index])) + " consume=" + str(consume))
+			if won and ptr == len(cars[index]) and (not consume):
+				cost += F + D - time
 	return cost
 
 def main():
