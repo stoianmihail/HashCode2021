@@ -2,6 +2,7 @@ import numpy as np
 import operator
 import sys
 import math
+import random
 
 files = ["a", "b", "c", "d", "e", "f"]
 
@@ -28,17 +29,24 @@ def solve(file):
 		name = splitted[2]
 		mapping[name] = i
 		L = int(splitted[3])
-		streets.append((B, E, name, L))
+		streets.append([B, E, name, L, D])
 		pos += 1
 	cars = list()
 	for i in range(V):
+		#if random.randint(1, 100) > 15:
+		#	continue
 		splitted = content[pos].split(' ')
 		p = int(splitted[0])
 		
 		tmp = []
+		duration = 0
 		for j in range(p):
 			tmp.append(mapping[splitted[1 + j]])
-		cars.append(tmp)
+			if j>0: 
+				duration += streets[mapping[splitted[1 + j]]][3]
+			streets[mapping[splitted[1 + j]]][4] = min(duration, streets[mapping[splitted[1 + j]]][4])
+		if (duration <= D):
+			cars.append(tmp)
 		pos += 1
 	score = 0
 	
@@ -48,12 +56,12 @@ def solve(file):
 	schedule = [dict() for i in range(I)]
 
 	for car in cars:
-		for street in car:
-			value = streets[street][2]
-			schedule[streets[street][1]][value] = schedule[streets[street][1]].get(value, 0)+1
-	
-	print(schedule)
-	# solution = set()
+		for i, street in enumerate(car):
+			if (i < len(car)-1):
+				value = street
+				schedule[streets[street][1]][value] = schedule[streets[street][1]].get(value, 0)+1
+
+
 	print("Writing..")
 	with open("output/" + file.split('/')[1].replace(".txt", "") + ".out", 'w+') as f:
 		f.write(str(sum(1 for intersection in schedule if len(intersection)>0)) + "\n")
@@ -66,10 +74,11 @@ def solve(file):
 				for number in intersection.values():
 					sum_cars += number
 
-
-				for element, number in intersection.items():
-					result = math.ceil(D/120*number/sum_cars)
-					f.write(element + " " + str(result) + "\n")
+				tmp = [(element, number) for element, number in intersection.items()]
+				list.sort(tmp)
+				for element, number in tmp:
+					result = math.ceil(D/20000*number/sum_cars)
+					f.write(streets[element][2] + " " + str(result) + "\n")
 
 	return score
 		
@@ -86,4 +95,3 @@ def main():
 
 if __name__ == '__main__':
   main()
-
