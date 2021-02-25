@@ -1,6 +1,7 @@
 import numpy as np
 import operator
 import sys
+import math
 
 files = ["a", "b", "c", "d", "e", "f"]
 
@@ -49,8 +50,9 @@ def solve(file):
 	for car in cars:
 		for street in car:
 			value = streets[street][2]
-			schedule[streets[street][1]][value] = schedule[streets[street][1]].get(value, 0)
+			schedule[streets[street][1]][value] = schedule[streets[street][1]].get(value, 0)+1
 	
+	print(schedule)
 	# solution = set()
 	print("Writing..")
 	with open("output/" + file.split('/')[1].replace(".txt", "") + ".out", 'w+') as f:
@@ -59,8 +61,15 @@ def solve(file):
 			if len(intersection) > 0:
 				f.write(str(i) + "\n")
 				f.write(str(len(intersection)) + "\n")
-				for element in intersection:
-					f.write(element + " 1\n")
+
+				sum_cars = 0
+				for number in intersection.values():
+					sum_cars += number
+
+
+				for element, number in intersection.items():
+					result = math.ceil(D/120*number/sum_cars)
+					f.write(element + " " + str(result) + "\n")
 
 	return score
 		
