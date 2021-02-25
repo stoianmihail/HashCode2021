@@ -2,7 +2,7 @@ import numpy as np
 import operator
 import sys
 
-files = ["a_", "b_", "c_", "d_", "e_", "f_"]
+files = ["a_", "b_"]
 
 def solve(file):
 	# Read each file
@@ -39,7 +39,7 @@ def main():
 		total = 0
 		for file in files:
 			total += solve("input/" + file + ".in")
-		print("Total score: " + str(solve()))
+		print("Total score: " + str(total))
 	else:
 		# Only one!
 		print("Score for " + sys.argv[1] + ": " + str(solve(sys.argv[1])))
