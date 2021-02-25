@@ -6,10 +6,10 @@ import random
 
 files = ["a", "b", "c", "d", "e", "f"]
 
-def solve(file):
+def solve(file, tune = 20000):
 	# Read each file
 	score = 0
-	print("Read " + file)
+	#print("Read " + file)
 	with open(file) as f:
 		content = f.read().splitlines()
 	
@@ -17,7 +17,7 @@ def solve(file):
 	D, I, S, V, F = list(map(int, content[0].split(' ')))
 	
 	# Get array from the second line
-	print("Parsing..")
+	#print("Parsing..")
 	pos = 1
 	streets = list()
 	mapping = dict()
@@ -50,8 +50,8 @@ def solve(file):
 		pos += 1
 	score = 0
 	
-	print("streets=" + str(streets))
-	print("cars=" + str(cars))
+	#print("streets=" + str(streets))
+	##print("cars=" + str(cars))
 
 	schedule = [dict() for i in range(I)]
 
@@ -62,7 +62,7 @@ def solve(file):
 				schedule[streets[street][1]][value] = schedule[streets[street][1]].get(value, 0)+1
 
 
-	print("Writing..")
+	#print("Writing..")
 	with open("output/" + file.split('/')[1].replace(".txt", "") + ".out", 'w+') as f:
 		f.write(str(sum(1 for intersection in schedule if len(intersection)>0)) + "\n")
 		for i, intersection in enumerate(schedule):
@@ -77,7 +77,7 @@ def solve(file):
 				tmp = [(element, number) for element, number in intersection.items()]
 				list.sort(tmp)
 				for element, number in tmp:
-					result = math.ceil(D/20000*number/sum_cars)
+					result = math.ceil(D/tune*number/sum_cars)
 					f.write(streets[element][2] + " " + str(result) + "\n")
 
 	return score
@@ -91,7 +91,7 @@ def main():
 		print("Total score: " + str(total))
 	else:
 		# Only one!
-		print("Score for " + sys.argv[1] + ": " + str(solve(sys.argv[1])))
+		print("Score for " + sys.argv[1] + ": " + str(solve(sys.argv[1], int(sys.argv[2]))))
 
 if __name__ == '__main__':
   main()

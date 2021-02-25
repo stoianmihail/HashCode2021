@@ -42,8 +42,8 @@ def read(file):
 		pos += 1
 	return F, I, D, streets, mapping, cars
 
-def readSolution(file):
-	solve(file)
+def readSolution(file, tune):
+	solve(file, tune)
 	F, I, D, streets, mapping, cars = read(file)
 	
 	with open("output/" + file.split('/')[1].replace(".txt", "") + ".out") as f:
@@ -70,8 +70,8 @@ def readSolution(file):
 		cycles[inter] = tmp
 	return F, I, D, streets, cars, cycles
 	
-def simulate(file):
-	F, I, D, streets, cars, cycles = readSolution(file)
+def simulate(file, tune = 20000):
+	F, I, D, streets, cars, cycles = readSolution(file, tune)
 	if False:
 		sim = np.zeros((D + 1, I))
 		for i in range(I):
@@ -157,7 +157,7 @@ def simulate(file):
 		next()
 	cost = 0
 	for index in range(len(cars)):
-		print("won=" + str(cs[index][3]) + " ptr=" + str(cs[index][2]) + " vs " + str(len(cars[index])) + " consume=" + str(cs[index][1]))
+		#print("won=" + str(cs[index][3]) + " ptr=" + str(cs[index][2]) + " vs " + str(len(cars[index])) + " consume=" + str(cs[index][1]))
 		if cs[index][3] and cs[index][2] == len(cars[index]) and (not cs[index][1]):
 			cost += F + D - cs[index][4]
 	if False:
@@ -208,8 +208,18 @@ def main():
 			total += simulate("input/" + file + ".txt")
 		print("Total score: " + str(total))
 	else:
+                F, I, D, _, _, _ = read(sys.argv[1])
+                best = 0
+                max_ = 0
+                for i in range(1000000, 1, -100):
+                    score = simulate(sys.argv[1], float(i))
+                    print("i=" + str(i) + " score=" + str(score))
+                    if score > max_:
+                        max_ = score
+                        best = i
+                    print("best=" + str(best))
 		# Only one!
-		print("Score for " + sys.argv[1] + ": " + str(simulate(sys.argv[1])))
+		#print("Score for " + sys.argv[1] + ": " + str(simulate(sys.argv[1], float(sys.argv[2]))))
 
 if __name__ == '__main__':
   main()
