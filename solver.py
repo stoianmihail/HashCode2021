@@ -43,13 +43,25 @@ def solve(file):
 	
 	print("streets=" + str(streets))
 	print("cars=" + str(cars))
+
+	schedule = [dict() for i in range(I)]
+
+	for car in cars:
+		for street in car:
+			value = streets[street][2]
+			schedule[streets[street][1]][value] = schedule[streets[street][1]].get(value, 0)
 	
 	# solution = set()
 	print("Writing..")
 	with open("output/" + file.split('/')[1].replace(".txt", "") + ".out", 'w+') as f:
-		f.write(str(0) + "\n")
-		for i in range(0):
-			f.write("test" + "\n")
+		f.write(str(sum(1 for intersection in schedule if len(intersection)>0)) + "\n")
+		for i, intersection in enumerate(schedule):
+			if len(intersection) > 0:
+				f.write(str(i) + "\n")
+				f.write(str(len(intersection)) + "\n")
+				for element in intersection:
+					f.write(element + " 1\n")
+
 	return score
 		
 def main():
